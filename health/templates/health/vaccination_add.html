@@ -1,0 +1,78 @@
+{% extends "cattle/base.html" %}
+{% load static %}
+
+{% block title %}Add Vaccination{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-syringe"></i> Add Vaccination</h4>
+                    <p class="text-muted">For {{ cattle.gov_tag }} - {{ cattle.name|default:"Unnamed" }}</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Vaccine *</label>
+                            <select name="vaccine_id" class="form-control" required>
+                                <option value="">Select Vaccine</option>
+                                {% for vaccine in vaccines %}
+                                    <option value="{{ vaccine.id }}">{{ vaccine.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Date Administered *</label>
+                            <input type="date" name="date_administered" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Next Due Date</label>
+                            <input type="date" name="next_due_date" class="form-control">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Batch Number</label>
+                                    <input type="text" name="batch_number" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Dosage</label>
+                                    <input type="text" name="dosage" class="form-control" placeholder="e.g., 5ml">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Veterinarian</label>
+                            <input type="text" name="veterinarian" class="form-control">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea name="notes" class="form-control" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Save Vaccination
+                            </button>
+                            <a href="{% url 'cattle:cattle_detail' cattle.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,667 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEBAITS Farm - {% block title %}Cattle Management{% endblock %}</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        /* ============================================
+   DASHBOARD STYLES (Add to base.html)
+   ============================================ */
+
+/* Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--white);
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.stat-card .label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    letter-spacing: 0.04em;
+}
+
+.stat-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.stat-card .badge {
+    font-size: 10px;
+    padding: 2px 10px;
+    border-radius: 50px;
+    font-weight: 600;
+}
+
+.badge-green {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+
+.badge-red {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.badge-orange {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.badge-blue {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+/* Alert Cards */
+.alert-card {
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-danger {
+    background: #ffebee;
+    border-left: 4px solid var(--red);
+}
+
+.alert-warning {
+    background: #fff3e0;
+    border-left: 4px solid var(--orange);
+}
+
+.alert-success {
+    background: #e8f5e9;
+    border-left: 4px solid #2e7d32;
+}
+
+.alert-card .icon {
+    font-size: 24px;
+}
+
+.alert-card .content {
+    flex: 1;
+}
+
+.alert-card .content h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.alert-card .content p {
+    font-size: 14px;
+    margin: 2px 0 0 0;
+    color: #5a6a5a;
+}
+
+/* Cards */
+.card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--gray-100);
+}
+
+.card-header h5 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Activity Items */
+.activity-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-icon.green { background: #e6f4ea; color: #1e7e34; }
+.activity-icon.orange { background: #fff3e0; color: #e65100; }
+.activity-icon.red { background: #ffebee; color: #c62828; }
+.activity-icon.blue { background: #e3f2fd; color: #1565c0; }
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content .title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.activity-content .meta {
+    font-size: 13px;
+    color: var(--gray-600);
+}
+
+/* Task Items */
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--gray-100);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    border-left: 3px solid var(--gray-600);
+}
+
+.task-item.high { border-left-color: var(--red); }
+.task-item.medium { border-left-color: var(--orange); }
+.task-item.low { border-left-color: var(--secondary); }
+
+.task-item .task-content {
+    flex: 1;
+}
+
+.task-item .task-content .task-title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.task-item .task-content .task-meta {
+    font-size: 12px;
+    color: var(--gray-600);
+}
+
+/* Breed Bars */
+.breed-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 100px;
+    margin-bottom: 12px;
+}
+
+.breed-bar {
+    flex: 1;
+    background: var(--primary);
+    border-radius: 4px 4px 0 0;
+    min-height: 4px;
+    transition: height 0.3s;
+}
+
+.breed-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--gray-600);
+}
+
+        :root {
+            --primary: #0d631b;
+            --primary-dark: #0a4a14;
+            --primary-light: #2e7d32;
+            --gray-50: #f9f9f9;
+            --gray-100: #f3f3f3;
+            --gray-200: #e2e2e2;
+            --gray-300: #bfcaba;
+            --gray-600: #707a6c;
+            --gray-900: #1a1c1c;
+            --white: #ffffff;
+            --red: #ba1a1a;
+            --orange: #e65100;
+            --blue: #1a73e8;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --radius: 12px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--gray-50); color: var(--gray-900); }
+        
+        /* ============================================
+           SIDEBAR
+           ============================================ */
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: var(--primary-dark);
+            color: white;
+            padding: 24px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-brand {
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-brand h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #a3f69c;
+            margin: 0;
+        }
+        
+        .sidebar-brand p {
+            font-size: 12px;
+            color: #88d982;
+            margin: 2px 0 0 0;
+            letter-spacing: 0.03em;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #b8d4b0;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .sidebar-nav a:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+        
+        .sidebar-nav a.active {
+            background: var(--primary-light);
+            color: white;
+        }
+        
+        .sidebar-nav a i {
+            width: 20px;
+            font-size: 16px;
+        }
+        
+        .sidebar-footer {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 16px;
+            margin-top: auto;
+        }
+        
+        .sidebar-footer .user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 4px;
+            margin-bottom: 12px;
+        }
+        
+        .sidebar-footer .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+        }
+        
+        .sidebar-footer .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .sidebar-footer .user-role {
+            font-size: 12px;
+            color: #88d982;
+        }
+        
+        .btn-register {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+            text-decoration: none;
+            transition: background 0.2s;
+            margin-bottom: 12px;
+        }
+        
+        .btn-register:hover {
+            background: #3a8f40;
+            color: white;
+        }
+        
+        /* ============================================
+           MAIN CONTENT
+           ============================================ */
+        .main-content {
+            margin-left: 250px;
+            padding: 24px 32px;
+            min-height: 100vh;
+        }
+        
+        /* Top Bar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0 20px 0;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 24px;
+        }
+        
+        .topbar h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .topbar p {
+            color: var(--gray-600);
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .topbar-actions .search-box {
+            position: relative;
+        }
+        
+        .topbar-actions .search-box input {
+            padding: 8px 16px 8px 36px;
+            border: 1px solid var(--gray-200);
+            border-radius: 50px;
+            background: var(--gray-100);
+            font-size: 14px;
+            width: 240px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .topbar-actions .search-box input:focus {
+            border-color: var(--primary);
+            background: white;
+        }
+        
+        .topbar-actions .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--gray-900);
+            cursor: pointer;
+        }
+        
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .menu-toggle {
+                display: block !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 16px;
+            }
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .topbar-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .topbar-actions .search-box input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- SIDEBAR -->
+<!-- ============================================ -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <h2>🐄 DEBAITS</h2>
+        <p>Farm Management</p>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <a href="{% url 'cattle:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="{% url 'cattle:cattle_list' %}" class="{% if request.resolver_match.url_name == 'cattle_list' %}active{% endif %}">
+            <i class="fas fa-cow"></i> Herd Management
+        </a>
+        <a href="{% url 'health:health_dashboard' %}" class="{% if request.resolver_match.url_name == 'health_dashboard' %}active{% endif %}">
+            <i class="fas fa-heartbeat"></i> Health
+        </a>
+        <a href="#" class="{% if request.resolver_match.url_name == 'health_dashboard' %}active{% endif %}">
+            <i class="fas fa-heartbeat"></i> Breeding
+            </a>
+        <a href="#">
+            <i class="fas fa-wallet"></i> Financials
+        </a>
+        <a href="/admin">
+            <i class="fas fa-user-shield"></i> Admin Panel
+        </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+        <a href="{% url 'cattle:cattle_add' %}" class="btn-register">
+            <i class="fas fa-plus-circle"></i> Register New Cattle
+        </a>
+
+       {% if user.is_authenticated %}
+    <div class="user">
+        <div class="user-avatar">{{ user.username|slice:":1"|upper }}</div>
+        <div>
+            <div class="user-name">{{ user.username }}</div>
+            <div class="user-role">Farm Manager</div>
+        </div>
+    </div>
+    <a href="{% url 'accounts:profile' %}" style="color: #88d982; text-decoration: none; font-size: 13px; display: block; padding: 4px 0;">
+        <i class="fas fa-user"></i> Profile
+    </a>
+    <a href="{% url 'admin:password_change' %}" style="color: #88d982; text-decoration: none; font-size: 13px; display: block; padding: 4px 0;">
+        <i class="fas fa-key"></i> Change Password
+
+    <a href="{% url 'accounts:logout' %}" style="color: #88d982; text-decoration: none; font-size: 13px; display: block; padding: 4px 0;">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+    {% else %}
+    <a href="{% url 'accounts:login' %}" style="color: #88d982; text-decoration: none; font-size: 13px; display: block; padding: 4px 0;">
+        <i class="fas fa-sign-in-alt"></i> Login
+    </a>
+    <a href="{% url 'accounts:register' %}" style="color: #88d982; text-decoration: none; font-size: 13px; display: block; padding: 4px 0;">
+        <i class="fas fa-user-plus"></i> Register
+    </a>
+    {% endif %}   
+
+
+
+        
+    </div>
+</aside>
+
+<!-- ============================================ -->
+<!-- MAIN CONTENT -->
+<!-- ============================================ -->
+<main class="main-content">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+    <div>
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>{% block page_title %}DEBAITS Farm{% endblock %}</h1>
+        <p>{% block page_subtitle %}Cattle Management System{% endblock %}</p>
+    </div>
+    <div class="topbar-actions">
+        <!-- Search Bar -->
+        <form method="GET" action="{% url 'cattle:cattle_list' %}" class="search-box" style="display: inline-block; position: relative; margin-right: 8px;">
+            <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #707a6c;"></i>
+            <input type="text" name="search" placeholder="Search cattle..." 
+                   value="{{ request.GET.search|default:'' }}"
+                   style="padding: 8px 16px 8px 36px; border: 1px solid #e2e2e2; border-radius: 50px; background: #f3f3f3; font-size: 14px; width: 200px; outline: none;">
+        </form>
+        
+        <!-- Notifications -->
+        <button class="btn btn-outline-success btn-sm" style="border-radius: 50px; position: relative; padding: 6px 10px;">
+            <i class="fas fa-bell"></i>
+            <span class="badge bg-danger" style="position: absolute; top: -5px; right: -5px; font-size: 10px; padding: 2px 6px;">3</span>
+        </button>
+        
+        <!-- Settings Dropdown -->
+        <div class="dropdown" style="display: inline-block;">
+            <button class="btn btn-outline-success btn-sm dropdown-toggle" style="border-radius: 50px; padding: 6px 10px;" type="button" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-cog"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                    <i class="fas fa-user"></i> Profile
+                </a></li>
+                <li><a class="dropdown-item" href="{% url 'admin:password_change' %}">
+                    <i class="fas fa-key"></i> Change Password
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</header>
+    <!-- ============================================ -->
+    <!-- PAGE CONTENT -->
+    <!-- ============================================ -->
+    {% block content %}
+    {% endblock %}
+
+    <!-- Footer -->
+    <footer style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--gray-200); font-size: 13px; color: var(--gray-600); display: flex; justify-content: space-between;">
+        <span>🐄 DEBAITS Farm Cattle Management System</span>
+        <span>v1.0 | Built by Thando Salani</span>
+    </footer>
+
+</main>
+
+<!-- ============================================ -->
+<!-- SCRIPTS -->
+<!-- ============================================ -->
+<script>
+    document.getElementById('menuToggle')?.addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('open');
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% block extra_js %}{% endblock %}
+
+
+</body>
+</html>

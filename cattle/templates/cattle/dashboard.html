@@ -1,0 +1,166 @@
+{% extends "cattle/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Herd Overview{% endblock %}
+{% block page_subtitle %}DEBAITS Farm, Botswana{% endblock %}
+
+{% block content %}
+
+<!-- Stats Cards -->
+<section class="stats-grid">
+    
+    <div class="stat-card">
+        <div class="label">🐄 Total Herd</div>
+        <div class="value">{{ total_cattle }}</div>
+        {% if growth_percentage %}
+        <span style="font-size: 12px; color: #2e7d32;">
+            <i class="fas fa-arrow-up"></i> +{{ growth_percentage }}%
+        </span>
+        {% endif %}
+    </div>
+    
+    <div class="stat-card">
+        <div class="label">Healthy</div>
+        <div class="value">{{ healthy_count }}</div>
+        <span class="badge badge-green">{{ healthy_percentage }}%</span>
+    </div>
+    
+    <div class="stat-card">
+        <div class="label">Sick</div>
+        <div class="value">{{ sick_count }}</div>
+        {% if sick_count > 0 %}
+        <span class="badge badge-red">ATTENTION</span>
+        {% else %}
+        <span class="badge badge-green">ALL CLEAR</span>
+        {% endif %}
+    </div>
+    
+    <div class="stat-card">
+        <div class="label">Pregnant</div>
+        <div class="value">{{ pregnant_count }}</div>
+        <span class="badge badge-blue">MONITORED</span>
+    </div>
+    
+    <div class="stat-card">
+        <div class="label">Vaccines Due</div>
+        <div class="value">{{ vaccines_due_count }}</div>
+        <span class="badge badge-orange">NEXT 7D</span>
+    </div>
+    
+</section>
+
+<!-- Quick Link -->
+<div style="text-align: center; margin-bottom: 16px;">
+    <a href="{% url 'cattle:cattle_list' %}" class="btn btn-success btn-lg">
+        <i class="fas fa-cow"></i> View All Cattle ({{ total_cattle }})
+    </a>
+</div>
+
+<!-- Alerts -->
+{% if missing_cattle > 0 %}
+<div class="alert-card alert-danger">
+    <div class="content">
+        <h4>{{ missing_cattle }} Cattle Missing!</h4>
+        <p>Please check the cattle list for details</p>
+    </div>
+    <a href="{% url 'cattle:cattle_list' %}?status=Missing" style="color: #c62828; font-weight: 600; text-decoration: none;">View</a>
+</div>
+{% endif %}
+
+{% if vaccines_due_count > 0 %}
+<div class="alert-card alert-warning">
+    <span class="icon">💉</span>
+    <div class="content">
+        <h4>{{ vaccines_due_count }} Vaccinations Due This Week</h4>
+        <p>
+            {% for vax in vaccines_due|slice:":3" %}
+                {{ vax.cattle.gov_tag }} ({{ vax.vaccine.name }}){% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            {% if vaccines_due_count > 3 %} and {{ vaccines_due_count|add:"-3" }} more{% endif %}
+        </p>
+    </div>
+    <a href="#" style="color: #e65100; font-weight: 600; text-decoration: none;">View</a>
+</div>
+{% endif %}
+
+<!-- Main Content -->
+<div class="row g-4">
+    
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Recent Activity</h5>
+                <a href="#" style="font-size: 13px; color: var(--primary); text-decoration: none; font-weight: 500;">View All</a>
+            </div>
+            <div class="card-body">
+                {% for event in recent_events %}
+                <div class="activity-item">
+                    <div class="activity-icon {% if event.event_type == 'BIRTH' or event.event_type == 'CALVING' %}green{% elif event.event_type == 'VACCINATION' %}orange{% elif event.event_type == 'HEALTH_CHECK' %}red{% else %}blue{% endif %}">
+                        <i class="fas fa-{% if event.event_type == 'BIRTH' or event.event_type == 'CALVING' %}baby{% elif event.event_type == 'VACCINATION' %}syringe{% elif event.event_type == 'HEALTH_CHECK' %}stethoscope{% elif event.event_type == 'SOLD' %}hand-holding-usd{% elif event.event_type == 'PURCHASED' %}shopping-cart{% else %}info{% endif %}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="title">{{ event.get_event_type_display|default:event.event_type }}</div>
+                        <div class="meta">
+                            {{ event.cattle.gov_tag }} • {{ event.location|default:"Kraal 1" }} • {{ event.event_date|timesince }} ago
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted" style="text-align: center; padding: 20px 0;">No recent activity</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-5">
+        
+        <div class="card" style="margin-bottom: 16px;">
+            <div class="card-header">
+                <h5><i class="fas fa-tasks"></i> Tasks Due</h5>
+                <span class="badge badge-orange">{{ pending_task_count }}</span>
+            </div>
+            <div class="card-body">
+                {% for task in tasks_due %}
+                <div class="task-item {% if task.priority == 'high' %}high{% elif task.priority == 'medium' %}medium{% else %}low{% endif %}">
+                    <div class="task-content">
+                        <div class="task-title">{{ task.title }}</div>
+                        <div class="task-meta">
+                            {% if task.priority == 'high' %}Priority: High{% elif task.priority == 'medium' %}Due in {{ task.due_in_days }} days{% else %}{{ task.recurrence|default:"One-time task" }}{% endif %}
+                        </div>
+                    </div>
+                    <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--primary);">
+                </div>
+                {% empty %}
+                <p class="text-muted" style="text-align: center;">No tasks due</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Herd Distribution</h5>
+            </div>
+            <div class="card-body">
+                <div class="breed-bars">
+                    {% for breed in breed_counts %}
+                    <div class="breed-bar" style="height: {% widthratio breed.count max_breed_count 100 %}%;"></div>
+                    {% empty %}
+                    <p class="text-muted">No breed data</p>
+                    {% endfor %}
+                </div>
+                <div class="breed-labels">
+                    {% for breed in breed_counts %}
+                    <span>{{ breed.breed|truncatechars:4 }}</span>
+                    {% empty %}
+                    <span>No data</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+{% endblock %}

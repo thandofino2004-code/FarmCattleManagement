@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEBAITS Farm - Add Health Record</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0d631b;
+            --primary-dark: #0a4a14;
+            --primary-light: #2e7d32;
+            --gray-50: #f9f9f9;
+            --gray-100: #f3f3f3;
+            --gray-200: #e2e2e2;
+            --gray-600: #707a6c;
+            --gray-900: #1a1c1c;
+            --white: #ffffff;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --radius: 12px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--gray-50); color: var(--gray-900); }
+        
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: var(--primary-dark);
+            color: white;
+            padding: 24px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-brand { padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 20px; }
+        .sidebar-brand h2 { font-size: 22px; font-weight: 700; color: #a3f69c; margin: 0; }
+        .sidebar-brand p { font-size: 12px; color: #88d982; margin: 2px 0 0 0; letter-spacing: 0.03em; }
+        .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+            border-radius: 8px; color: #b8d4b0; text-decoration: none;
+            font-size: 14px; font-weight: 500; transition: all 0.2s;
+        }
+        .sidebar-nav a:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-nav a.active { background: var(--primary-light); color: white; }
+        .sidebar-nav a i { width: 20px; font-size: 16px; }
+        
+        .main-content { margin-left: 250px; padding: 24px 32px; min-height: 100vh; }
+        
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0 20px 0; border-bottom: 1px solid var(--gray-200); margin-bottom: 24px;
+        }
+        .topbar h1 { font-size: 24px; font-weight: 700; margin: 0; }
+        .topbar p { color: var(--gray-600); margin: 0; font-size: 14px; }
+        
+        .form-container {
+            background: var(--white);
+            padding: 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow);
+        }
+        .form-container label { font-weight: 600; font-size: 14px; }
+        .form-container .required::after { content: " *"; color: #ba1a1a; }
+        .form-container select, .form-container textarea {
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            padding: 8px 12px;
+            width: 100%;
+            font-size: 14px;
+        }
+        .form-container select:focus, .form-container textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .btn-primary-custom:hover { background: var(--primary-dark); color: white; }
+        .btn-secondary-custom {
+            background: var(--gray-200);
+            color: var(--gray-600);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .btn-secondary-custom:hover { background: var(--gray-300); color: var(--gray-900); }
+        
+        .menu-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
+        
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .menu-toggle { display: block !important; }
+        }
+        @media (max-width: 576px) {
+            .main-content { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <h2>🐄 DEBAITS</h2>
+        <p>Farm Management</p>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'cattle:dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <a href="{% url 'cattle:cattle_list' %}"><i class="fas fa-cow"></i> Herd Management</a>
+        <a href="#" class="active"><i class="fas fa-heartbeat"></i> Health</a>
+        <a href="#"><i class="fas fa-wallet"></i> Financials</a>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+
+    <header class="topbar">
+        <div>
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <h1>Add Health Record</h1>
+            <p>For {{ cattle.gov_tag }} - {{ cattle.name|default:"Unnamed" }}</p>
+        </div>
+        <div>
+            <a href="{% url 'cattle:cattle_detail' cattle.id %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Profile
+            </a>
+        </div>
+    </header>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Form -->
+    <div class="form-container">
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="row g-4">
+                <!-- Health Status -->
+                <div class="col-12">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="required">Health Status</label>
+                            <select name="health_status" class="form-control" required>
+                                <option value="">Select Status</option>
+                                {% for choice in health_status_choices %}
+                                    <option value="{{ choice.0 }}" {% if form_data.health_status == choice.0 %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Symptoms -->
+                <div class="col-12">
+                    <label>Symptoms</label>
+                    <textarea name="symptoms" class="form-control" rows="3" placeholder="Describe any symptoms...">{{ form_data.symptoms|default:'' }}</textarea>
+                </div>
+
+                <!-- Treatment -->
+                <div class="col-12">
+                    <label>Treatment Given</label>
+                    <textarea name="treatment" class="form-control" rows="3" placeholder="Describe treatment given...">{{ form_data.treatment|default:'' }}</textarea>
+                </div>
+
+                <!-- Notes -->
+                <div class="col-12">
+                    <label>Additional Notes</label>
+                    <textarea name="notes" class="form-control" rows="2" placeholder="Any additional notes...">{{ form_data.notes|default:'' }}</textarea>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="d-flex gap-3">
+                <button type="submit" class="btn-primary-custom">
+                    <i class="fas fa-save"></i> Save Health Record
+                </button>
+                <a href="{% url 'cattle:cattle_detail' cattle.id %}" class="btn-secondary-custom">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<script>
+    document.getElementById('menuToggle')?.addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('open');
+    });
+</script>
+
+</body>
+</html>

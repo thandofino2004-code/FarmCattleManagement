@@ -1,0 +1,548 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEBAITS Farm - {{ cattle.gov_tag }} Profile</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0d631b;
+            --primary-dark: #0a4a14;
+            --primary-light: #2e7d32;
+            --gray-50: #f9f9f9;
+            --gray-100: #f3f3f3;
+            --gray-200: #e2e2e2;
+            --gray-600: #707a6c;
+            --gray-900: #1a1c1c;
+            --white: #ffffff;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --radius: 12px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--gray-50); color: var(--gray-900); }
+        
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: var(--primary-dark);
+            color: white;
+            padding: 24px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-brand { padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 20px; }
+        .sidebar-brand h2 { font-size: 22px; font-weight: 700; color: #a3f69c; margin: 0; }
+        .sidebar-brand p { font-size: 12px; color: #88d982; margin: 2px 0 0 0; letter-spacing: 0.03em; }
+        .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+            border-radius: 8px; color: #b8d4b0; text-decoration: none;
+            font-size: 14px; font-weight: 500; transition: all 0.2s;
+        }
+        .sidebar-nav a:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-nav a.active { background: var(--primary-light); color: white; }
+        .sidebar-nav a i { width: 20px; font-size: 16px; }
+        
+        .main-content { margin-left: 250px; padding: 24px 32px; min-height: 100vh; }
+        
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0 20px 0; border-bottom: 1px solid var(--gray-200); margin-bottom: 24px;
+        }
+        .topbar h1 { font-size: 24px; font-weight: 700; margin: 0; }
+        .topbar p { color: var(--gray-600); margin: 0; font-size: 14px; }
+        
+        .profile-header {
+            background: var(--white);
+            padding: 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+        .profile-header .tag { font-size: 28px; font-weight: 700; color: var(--primary); }
+        .profile-header .sub { color: var(--gray-600); }
+        
+        .badge-status {
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .badge-active { background: #e8f5e9; color: #2e7d32; }
+        .badge-missing { background: #ffebee; color: #c62828; }
+        .badge-sold { background: #e0e0e0; color: #424242; }
+        .badge-deceased { background: #424242; color: white; }
+        
+        .info-section {
+            background: var(--white);
+            padding: 20px 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow);
+        }
+        .info-section .label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--gray-600); }
+        .info-section .value { font-size: 16px; font-weight: 500; margin-top: 2px; }
+        
+        .menu-toggle { display: none; background: none; border: none; font-size: 24px; cursor: pointer; }
+        
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .menu-toggle { display: block !important; }
+        }
+        @media (max-width: 576px) {
+            .main-content { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Actions Section -->
+<div class="d-flex gap-2 flex-wrap mb-3">
+    <a href="{% url 'health:health_record_add' cattle.id %}" class="btn btn-sm btn-primary">
+        <i class="fas fa-notes-medical"></i> Add Health Record
+    </a>
+    <a href="{% url 'weight:weight_record_add' %}" class="btn btn-sm btn-success" onclick="openWeightModal(); return false;">
+        <i class="fas fa-weight-scale"></i> Record Weight
+    </a>
+    <a href="{% url 'breeding:pregnancy_record_add' cattle.id %}" class="btn btn-sm btn-warning">
+        <i class="fas fa-baby"></i> Record Pregnancy
+    </a>
+    <a href="{% url 'health:vaccination_add' cattle.id %}" class="btn btn-sm btn-info">
+        <i class="fas fa-syringe"></i> Add Vaccination
+    </a>
+</div>
+
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <h2>🐄 DEBAITS</h2>
+        <p>Farm Management</p>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'cattle:dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <a href="{% url 'cattle:cattle_list' %}" class="active"><i class="fas fa-cow"></i> Herd Management</a>
+        <a href="{% url 'health:health_dashboard' %}"><i class="fas fa-heartbeat"></i> Health</a>
+        <a href="{% url 'breeding:breeding_dashboard' %}"><i class="fas fa-heartbeat"></i> Breeding</a>
+
+        <a href="#"><i class="fas fa-wallet"></i> Financials</a>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+
+    <header class="topbar">
+        <div>
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <h1>Cattle Profile</h1>
+            <p>Viewing details for {{ cattle.gov_tag }}</p>
+        </div>
+        <div>
+            <a href="{% url 'cattle:cattle_list' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </header>
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div class="d-flex align-items-center gap-4">
+
+                <!--photo here-->
+                {% if cattle.photo %}
+            <img src="{{ cattle.photo.url }}" alt="{{ cattle.gov_tag }}" 
+                 style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; border: 2px solid var(--gray-200);">
+            {% else %}
+            <div style="width: 120px; height: 120px; background: var(--gray-200); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--gray-200);">
+                <i class="fas fa-cow" style="font-size: 48px; color: var(--gray-600);"></i>
+            </div>
+            {% endif %} 
+
+                <div class="tag">{{ cattle.gov_tag }}</div>
+                <div class="sub">
+                    {% if cattle.ear_tag %}<span class="badge bg-secondary me-2">{{ cattle.ear_tag }}</span>{% endif %}
+                    <span class="badge-status badge-{{ cattle.current_status|lower }}">{{ cattle.current_status }}</span>
+                </div>
+                <div class="mt-2">
+                    <h4>{{ cattle.name|default:"Unnamed" }}</h4>
+                    <p class="text-muted">{{ cattle.breed }} • {{ cattle.sex }} • {% if age %}{{ age }} years old{% else %}Age unknown{% endif %}</p>
+                </div>
+            </div>
+
+            <div>
+    <a href="{% url 'cattle:cattle_edit' cattle.id %}" class="btn btn-sm btn-outline-primary">
+        <i class="fas fa-edit"></i> Edit
+    </a>
+    <a href="{% url 'cattle:cattle_delete' cattle.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this cattle?');">
+        <i class="fas fa-trash"></i> Delete
+    </a>
+</div>
+            <div>
+                <a href="{% url 'cattle:cattle_edit' cattle.id %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Edit</a>
+                <a href="{% url 'cattle:cattle_delete' cattle.id %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i> Delete</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="info-section">
+                <div class="label"><i class="fas fa-tag"></i> Gov Tag</div>
+                <div class="value">{{ cattle.gov_tag }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-section">
+                <div class="label"><i class="fas fa-tag"></i> Ear Tag</div>
+                <div class="value">{{ cattle.ear_tag|default:"Not assigned" }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-section">
+                <div class="label"><i class="fas fa-birthday-cake"></i> Date of Birth</div>
+                <div class="value">{{ cattle.date_of_birth|default:"Unknown" }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-section">
+                <div class="label"><i class="fas fa-map-marker-alt"></i> Location</div>
+                <div class="value">{{ cattle.location|default:"Kraal 1" }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-section">
+                <div class="label"><i class="fas fa-palette"></i> Colour</div>
+                <div class="value">{{ cattle.colour|default:"Not specified" }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-section">
+                <div class="label"><i class="fas fa-heartbeat"></i> Health Status</div>
+                <div class="value">
+                    <span class="badge {% if cattle.health_status == 'Healthy' %}badge-success{% else %}badge-warning{% endif %}">
+                        {{ cattle.health_status|default:"Unknown" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-section">
+                <div class="label"><i class="fas fa-money-bill"></i> Purchase Price</div>
+                <div class="value">{{ cattle.purchase_price|default:"Not recorded" }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="info-section">
+                <div class="label"><i class="fas fa-user"></i> Source</div>
+                <div class="value">{{ cattle.source_supplier|default:"Unknown" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Family -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="info-section">
+                <h5><i class="fas fa-female"></i> Mother</h5>
+                {% if parents %}
+                    {% for parent in parents %}
+                        {% if parent.relation == 'Mother' %}
+                            <a href="{% url 'cattle:cattle_detail' parent.cattle.id %}">
+                                {{ parent.cattle.gov_tag }} - {{ parent.cattle.name|default:"Unnamed" }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted">Not recorded</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="info-section">
+                <h5><i class="fas fa-male"></i> Father</h5>
+                {% if parents %}
+                    {% for parent in parents %}
+                        {% if parent.relation == 'Father' %}
+                            <a href="{% url 'cattle:cattle_detail' parent.cattle.id %}">
+                                {{ parent.cattle.gov_tag }} - {{ parent.cattle.name|default:"Unnamed" }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span class="text-muted">Not recorded</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Children -->
+    {% if children %}
+    <div class="info-section mb-4">
+        <h5><i class="fas fa-children"></i> Offspring ({{ children.count }})</h5>
+        <div class="row g-2 mt-2">
+            {% for child in children %}
+            <div class="col-md-3">
+                <a href="{% url 'cattle:cattle_detail' child.id %}">
+                    {{ child.gov_tag }} - {{ child.name|default:"Unnamed" }}
+                </a>
+                <span class="badge badge-{{ child.current_status|lower }}">{{ child.current_status }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Events -->
+    {% if events %}
+    <div class="info-section mb-4">
+        <h5><i class="fas fa-history"></i> Recent Events</h5>
+        <div class="table-responsive mt-2">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Event</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events|slice:":10" %}
+                    <tr>
+                        <td>{{ event.event_date|date:"Y-m-d" }}</td>
+                        <td><span class="badge bg-secondary">{{ event.event_type }}</span></td>
+                        <td>{{ event.description|truncatechars:50 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Health Records -->
+    {% if health_records %}
+    <div class="info-section mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+        <h5><i class="fas fa-notes-medical"></i> Health Records</h5>
+       <a href="{% url 'health:health_record_add' cattle.id %}" class="btn btn-sm btn-primary">            
+             <i class="fas fa-plus"></i> Add Health Record
+        </a>
+    
+        <div class="table-responsive mt-2">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Symptoms</th>
+                        <th>Treatment</th>
+                        <th style="text-align:right;">Actions</th>  
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in health_records %}
+                    <tr>
+                        <td>{{ record.record_date|date:"Y-m-d" }}</td>
+                        <td><span class="badge bg-info">{{ record.health_status }}</span></td>
+                        <td>{{ record.symptoms|truncatechars:30 }}</td>
+                        <td>{{ record.treatment|truncatechars:30 }}</td>
+                         <td style="text-align:right;">
+                        <!-- ADDED EDIT AND DELETE BUTTONS HERE -->
+                        <a href="{% url 'health:health_record_edit' record.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'health:health_record_delete' record.id %}" class="btn btn-sm btn-outline-danger" 
+                           onclick="return confirm('Are you sure you want to delete this health record?');">
+                            <i class="fas fa-trash"></i>
+                        </a> 
+                    </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Vaccinations -->
+    {% if vaccinations %}
+    <div class="info-section mb-4">
+        <div class="d-flex justify-content-between align-items-center"></div>
+        <h5><i class="fas fa-syringe"></i> Vaccinations</h5>
+        <a href="{% url 'health:vaccination_add' cattle.id %}" class="btn btn-sm btn-success">
+            <i class="fas fa-plus"></i>Add Vaccination
+        </a>
+        <div class="table-responsive mt-2">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Vaccine</th>
+                        <th>Next Due</th>
+                        <th>Vet</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vax in vaccinations %}
+                    <tr>
+                        <td>{{ vax.date_administered|date:"Y-m-d" }}</td>
+                        <td>{{ vax.vaccine.name }}</td>
+                        <td>{{ vax.next_due_date|date:"Y-m-d"|default:"N/A" }}</td>
+                        <td>{{ vax.veterinarian|default:"N/A" }}</td>
+                        <td style="text-align:right; white-space:nowrap;">
+                            <a href="{% url 'health:vaccination_edit' vax.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'health:vaccination_delete' vax.id %}" class="btn btn-sm btn-outline-danger" title="Delete"
+                            onclick="return confirm('Are you sure you want to delete this vaccination?');">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                        </td>
+                         </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No vaccinations found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %} 
+
+
+<!-- Weight Records -->
+{% if cattle.weights.all %}
+<div class="info-section mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5><i class="fas fa-weight-scale"></i> Weight Records</h5>
+        <a href="{% url 'weight:weight_record_add' %}" class="btn btn-sm btn-success">
+            <i class="fas fa-plus"></i> Add Weight
+        </a>
+    </div>
+    <div class="table-responsive mt-2">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Weight (kg)</th>
+                    <th>Notes</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for weight in cattle.weights.all|slice:":10" %}
+                <tr>
+                    <td>{{ weight.record_date|date:"Y-m-d" }}</td>
+                    <td><strong>{{ weight.weight_kg }} kg</strong></td>
+                    <td>{{ weight.notes|default:"-" }}</td>
+                    <td style="text-align:right; white-space:nowrap;">
+                        <a href="{% url 'weight:weight_record_edit' weight.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'weight:weight_record_delete' weight.id %}" class="btn btn-sm btn-outline-danger" title="Delete"
+                           onclick="return confirm('Are you sure you want to delete this weight record?');">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">No weight records found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+
+<!-- Pregnancy Records -->
+{% if pregnancies %}
+<div class="info-section mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5><i class="fas fa-baby"></i> Pregnancy Records</h5>
+        <a href="{% url 'breeding:pregnancy_record_add' cattle.id %}" class="btn btn-sm btn-success">
+            <i class="fas fa-plus"></i> Add Pregnancy
+        </a>
+    </div>
+    <div class="table-responsive mt-2">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Service Date</th>
+                    <th>Status</th>
+                    <th>Expected Calving</th>
+                    <th>Notes</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pregnancy in pregnancies %}
+                <tr>
+                    <td>{{ pregnancy.service_date|date:"Y-m-d" }}</td>
+                    <td><span class="badge {% if pregnancy.pregnancy_status == 'CONFIRMED' %}bg-success{% elif pregnancy.pregnancy_status == 'SUSPECTED' %}bg-warning{% else %}bg-danger{% endif %}">
+                        {{ pregnancy.get_pregnancy_status_display }}
+                    </span></td>
+                    <td>{{ pregnancy.expected_calving_date|date:"Y-m-d"|default:"-" }}</td>
+                    <td>{{ pregnancy.notes|truncatechars:30|default:"-" }}</td>
+                    <td style="text-align:right; white-space:nowrap;">
+                        <a href="{% url 'breeding:pregnancy_record_edit' pregnancy.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'breeding:pregnancy_record_delete' pregnancy.id %}" class="btn btn-sm btn-outline-danger" title="Delete"
+                           onclick="return confirm('Are you sure you want to delete this pregnancy record?');">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No pregnancy records found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+                
+    <!-- Notes -->
+    {% if cattle.notes %}
+    <div class="info-section">
+        <h5><i class="fas fa-pencil-alt"></i> Notes</h5>
+        <p class="mt-2">{{ cattle.notes }}</p>
+    </div>
+    {% endif %}
+
+</main>
+
+<script>
+    document.getElementById('menuToggle')?.addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('open');
+    });
+</script>
+
+</body>
+</html>

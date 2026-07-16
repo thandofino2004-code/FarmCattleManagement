@@ -1,0 +1,477 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEBAITS Farm - {{ action }} Cattle</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0d631b;
+            --primary-dark: #0a4a14;
+            --primary-light: #2e7d32;
+            --gray-50: #f9f9f9;
+            --gray-100: #f3f3f3;
+            --gray-200: #e2e2e2;
+            --gray-600: #707a6c;
+            --gray-900: #1a1c1c;
+            --white: #ffffff;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+        }
+
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background: var(--primary-dark);
+            color: white;
+            padding: 24px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-brand h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #a3f69c;
+            margin: 0;
+        }
+
+        .sidebar-brand p {
+            font-size: 12px;
+            color: #88d982;
+            margin: 2px 0 0 0;
+            letter-spacing: 0.03em;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #b8d4b0;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+        }
+
+        .sidebar-nav a.active {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .sidebar-nav a i {
+            width: 20px;
+            font-size: 16px;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 24px 32px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0 20px 0;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 24px;
+        }
+
+        .topbar h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .topbar p {
+            color: var(--gray-600);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .form-container {
+            background: var(--white);
+            padding: 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow);
+        }
+
+        .form-container label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-900);
+        }
+
+        .form-container .required::after {
+            content: " *";
+            color: #ba1a1a;
+        }
+
+        .form-container input,
+        .form-container select,
+        .form-container textarea {
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            padding: 8px 12px;
+            width: 100%;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-container input:focus,
+        .form-container select:focus,
+        .form-container textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(13, 99, 27, 0.1);
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        .btn-secondary-custom {
+            background: var(--gray-200);
+            color: var(--gray-600);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn-secondary-custom:hover {
+            background: var(--gray-300);
+            color: var(--gray-900);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <h2>🐄 DEBAITS</h2>
+            <p>Farm Management</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'cattle:dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="{% url 'cattle:cattle_list' %}"><i class="fas fa-cow"></i> Herd Management</a>
+            <a href="#" class="active"><i class="fas fa-plus-circle"></i> {{ action }} Cattle</a>
+            <a href="{% url 'health:health_dashboard' %}"><i class="fas fa-heartbeat"></i> Health</a>
+            <a href="{% url 'breeding:breeding_dashboard' %}"><i class="fas fa-baby"></i> Breeding</a>
+            <a href="#"><i class="fas fa-wallet"></i> Financials</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+                <h1>{{ action }} Cattle</h1>
+                <p>{{ action }} a new animal to the DEBAITS Farm herd</p>
+            </div>
+        </header>
+
+        <!-- Messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Form -->
+        <div class="form-container">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row g-4">
+                    <!-- Identification -->
+                    <div class="col-12">
+                        <h5 class="mb-3"><i class="fas fa-tag"></i> Identification</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="required">Government Tag</label>
+                                <input type="text" name="gov_tag" class="form-control" placeholder="GOV-001"
+                                    value="{{ form_data.gov_tag|default:'' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Ear Tag</label>
+                                <input type="text" name="ear_tag" class="form-control" placeholder="BOT-001"
+                                    value="{{ form_data.ear_tag|default:'' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Name</label>
+                                <input type="text" name="name" class="form-control" placeholder="Bulls-eye"
+                                    value="{{ form_data.name|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Animal Details -->
+                    <div class="col-12">
+                        <h5 class="mb-3"><i class="fas fa-paw"></i> Animal Details</h5>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="required">Breed</label>
+                                <select name="breed" class="form-control" required>
+                                    <option value="">Select Breed</option>
+                                    {% for choice in breed_choices %}
+                                    <option value="{{ choice.0 }}" {% if form_data.breed == choice.0 %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="required">Sex</label>
+                                <select name="sex" class="form-control" required>
+                                    <option value="">Select Sex</option>
+                                    {% for choice in sex_choices %}
+                                    <option value="{{ choice.0 }}" {% if form_data.sex == choice.0 %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Date of Birth</label>
+                                <input type="date" name="date_of_birth" class="form-control"
+                                    value="{{ form_data.date_of_birth|default:'' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Colour</label>
+                                <select name="colour" class="form-control">
+                                    <option value="">Select Colour</option>
+                                    {% for choice in colour_choices %}
+                                    <option value="{{ choice.0 }}" {% if form_data.colour == choice.0 %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-12">
+                        <h5 class="mb-3"><i class="fas fa-flag"></i> Status</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label>Health Status</label>
+                                <select name="health_status" class="form-control">
+                                    {% for choice in health_status_choices %}
+                                    <option value="{{ choice.0 }}" {% if form_data.health_status == choice.0 or choice.0 == 'Healthy' %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Current Status</label>
+                                <select name="current_status" class="form-control">
+                                    {% for choice in status_choices %}
+                                    <option value="{{ choice.0 }}" {% if form_data.current_status == choice.0 or choice.0 == 'Active' %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Location</label>
+                                <input type="text" name="location" class="form-control" placeholder="Kraal 1"
+                                    value="{{ form_data.location|default:'Kraal 1' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Family -->
+                    <div class="col-12">
+                        <h5 class="mb-3"><i class="fas fa-family"></i> Family</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label>Mother's Gov Tag</label>
+                                <input type="text" name="mother_gov_tag" class="form-control" placeholder="GOV-XXX"
+                                    value="{{ form_data.mother_gov_tag|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Father's Gov Tag</label>
+                                <input type="text" name="father_gov_tag" class="form-control" placeholder="GOV-XXX"
+                                    value="{{ form_data.father_gov_tag|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Purchase Info -->
+                    <div class="col-12">
+                        <h5 class="mb-3"><i class="fas fa-shopping-cart"></i> Purchase Information</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label>Purchase Date</label>
+                                <input type="date" name="purchase_date" class="form-control"
+                                    value="{{ form_data.purchase_date|default:'' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Purchase Price (BWP)</label>
+                                <input type="number" name="purchase_price" class="form-control" placeholder="5000.00"
+                                    value="{{ form_data.purchase_price|default:'' }}" step="0.01">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Source/Supplier</label>
+                                <input type="text" name="source_supplier" class="form-control"
+                                    placeholder="Supplier name" value="{{ form_data.source_supplier|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo -->
+                    <div class="col-12">
+                        <h5 class="mb-3"><i class="fas fa-camera"></i> Photo</h5>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                {% if cattle and cattle.photo %}
+                                <div class="mb-2">
+                                    <label>Current Photo:</label>
+                                    <br>
+                                    <img src="{{ cattle.photo.url }}" alt="Current photo"
+                                        style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid var(--gray-200);">
+                                </div>
+                                <div class="form-text text-muted mb-2">Upload a new photo to replace the current one.</div>
+                                {% endif %}
+                                <label>{% if cattle and cattle.photo %}New Photo (optional){% else %}Upload Photo{% endif %}</label>
+                                <input type="file" name="photo" class="form-control" accept="image/*">
+                                <small class="text-muted">Supported formats: JPG, PNG. Max size: 5MB</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="col-12">
+                        <h5 class="mb-3"><i class="fas fa-pencil-alt"></i> Additional Notes</h5>
+                        <textarea name="notes" class="form-control" rows="3"
+                            placeholder="Any additional notes...">{{ form_data.notes|default:'' }}</textarea>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn-primary-custom">
+                        <i class="fas fa-save"></i> Save Cattle
+                    </button>
+                    <a href="{% url 'cattle:cattle_list' %}" class="btn-secondary-custom">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+    </main>
+
+    <script>
+        document.getElementById('menuToggle')?.addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

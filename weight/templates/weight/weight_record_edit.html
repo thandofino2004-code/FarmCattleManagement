@@ -1,0 +1,47 @@
+{% extends "cattle/base.html" %}
+{% load static %}
+
+{% block title %}Edit Weight Record{% endblock %}
+
+{% block page_title %}Edit Weight Record{% endblock %}
+{% block page_subtitle %}For {{ cattle.gov_tag }} - {{ cattle.name|default:"Unnamed" }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label required">Weight (kg)</label>
+                        <input type="number" name="weight_kg" class="form-control" step="0.1" 
+                               value="{{ form_data.weight_kg }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label required">Record Date</label>
+                        <input type="date" name="record_date" class="form-control" 
+                               value="{{ form_data.record_date|date:'Y-m-d' }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="notes" class="form-control" rows="2">{{ form_data.notes|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Weight
+                        </button>
+                        <a href="{% url 'cattle:cattle_detail' cattle.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

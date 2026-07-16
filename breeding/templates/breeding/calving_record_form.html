@@ -1,0 +1,108 @@
+{% extends "cattle/base.html" %}
+{% load static %}
+
+{% block title %}Record Calving{% endblock %}
+
+{% block page_title %}Record Calving{% endblock %}
+{% block page_subtitle %}For {{ mother.gov_tag }} - {{ mother.name|default:"Unnamed" }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <h6 class="mb-3">Calf Information</h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label required">Calf Gov Tag</label>
+                        <input type="text" name="calf_gov_tag" class="form-control" 
+                               value="{{ form_data.calf_gov_tag|default:'' }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Calf Name</label>
+                        <input type="text" name="calf_name" class="form-control" 
+                               value="{{ form_data.calf_name|default:'' }}">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label required">Breed</label>
+                                <select name="calf_breed" class="form-control" required>
+                                    <option value="">Select Breed</option>
+                                    {% for choice in breed_choices %}
+                                        <option value="{{ choice.0 }}" {% if form_data.calf_breed == choice.0 %}selected{% endif %}>
+                                            {{ choice.1 }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label required">Sex</label>
+                                <select name="calf_sex" class="form-control" required>
+                                    <option value="">Select Sex</option>
+                                    {% for choice in sex_choices %}
+                                        <option value="{{ choice.0 }}" {% if form_data.calf_sex == choice.0 %}selected{% endif %}>
+                                            {{ choice.1 }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mb-3 mt-4">Calving Details</h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label required">Calving Date</label>
+                        <input type="date" name="calving_date" class="form-control" 
+                               value="{{ form_data.calving_date|date:'Y-m-d' }}" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Outcome</label>
+                                <select name="calving_outcome" class="form-control">
+                                    {% for choice in calving_outcome_choices %}
+                                        <option value="{{ choice.0 }}" {% if form_data.calving_outcome == choice.0 %}selected{% endif %}>
+                                            {{ choice.1 }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Number of Calves</label>
+                                <input type="number" name="number_of_calves" class="form-control" 
+                                       value="{{ form_data.number_of_calves|default:1 }}" min="1" max="3">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="notes" class="form-control" rows="3">{{ form_data.notes|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Record Calving
+                        </button>
+                        <a href="{% url 'cattle:cattle_detail' mother.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

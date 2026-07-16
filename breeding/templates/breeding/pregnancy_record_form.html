@@ -1,0 +1,60 @@
+{% extends "cattle/base.html" %}
+{% load static %}
+
+{% block title %}Add Pregnancy Record{% endblock %}
+
+{% block page_title %}Add Pregnancy Record{% endblock %}
+{% block page_subtitle %}For {{ cattle.gov_tag }} - {{ cattle.name|default:"Unnamed" }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label required">Service Date</label>
+                        <input type="date" name="service_date" class="form-control" 
+                               value="{{ form_data.service_date|date:'Y-m-d' }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label required">Pregnancy Status</label>
+                        <select name="pregnancy_status" class="form-control" required>
+                            <option value="">Select Status</option>
+                            {% for choice in pregnancy_status_choices %}
+                                <option value="{{ choice.0 }}" {% if form_data.pregnancy_status == choice.0 %}selected{% endif %}>
+                                    {{ choice.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Expected Calving Date</label>
+                        <input type="date" name="expected_calving_date" class="form-control" 
+                               value="{{ form_data.expected_calving_date|date:'Y-m-d' }}">
+                        <small class="text-muted">Usually 280 days after service date</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="notes" class="form-control" rows="3">{{ form_data.notes|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Save Record
+                        </button>
+                        <a href="{% url 'cattle:cattle_detail' cattle.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

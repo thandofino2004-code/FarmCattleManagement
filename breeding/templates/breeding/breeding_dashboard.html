@@ -1,0 +1,149 @@
+{% extends "cattle/base.html" %}
+{% load static %}
+
+{% block title %}Breeding Dashboard{% endblock %}
+
+{% block page_title %}Breeding Dashboard{% endblock %}
+{% block page_subtitle %}Track pregnancies and calving at DEBAITS Farm{% endblock %}
+
+{% block content %}
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted"> Pregnant</h6>
+                <h2 class="card-title mb-0">{{ pregnant_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Upcoming Calvings (30 days)</h6>
+                <h2 class="card-title mb-0">{{ upcoming_calvings_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Recent Calvings</h6>
+                <h2 class="card-title mb-0">{{ calving_count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pregnant Cattle -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Pregnant Cattle</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Cattle</th>
+                        <th>Service Date</th>
+                        <th>Expected Calving</th>
+                        <th>Days Until</th>
+                        <th>Status</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pregnancy in pregnancies %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'cattle:cattle_detail' pregnancy.cattle.id %}">
+                                {{ pregnancy.cattle.gov_tag }}
+                            </a>
+                        </td>
+                        <td>{{ pregnancy.service_date|date:"Y-m-d" }}</td>
+                        <td>{{ pregnancy.expected_calving_date|date:"Y-m-d"|default:"-" }}</td>
+                        <td>
+                            {% if pregnancy.expected_calving_date %}
+                                {{ pregnancy.expected_calving_date|timeuntil }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {% if pregnancy.pregnancy_status == 'CONFIRMED' %}bg-success{% elif pregnancy.pregnancy_status == 'SUSPECTED' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ pregnancy.get_pregnancy_status_display }}
+                            </span>
+                        </td>
+                        <td style="text-align:right; white-space:nowrap;">
+                            <a href="{% url 'breeding:pregnancy_record_edit' pregnancy.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'breeding:pregnancy_record_delete' pregnancy.id %}" class="btn btn-sm btn-outline-danger" title="Delete"
+                               onclick="return confirm('Are you sure you want to delete this pregnancy record?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No pregnant cattle</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Calvings -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Recent Calvings</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Mother</th>
+                        <th>Calf</th>
+                        <th>Calving Date</th>
+                        <th>Outcome</th>
+                        <th>Calves</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for calving in calvings %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'cattle:cattle_detail' calving.mother.id %}">
+                                {{ calving.mother.gov_tag }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'cattle:cattle_detail' calving.calf.id %}">
+                                {{ calving.calf.gov_tag }}
+                            </a>
+                        </td>
+                        <td>{{ calving.calving_date|date:"Y-m-d" }}</td>
+                        <td>
+                            <span class="badge {% if calving.calving_outcome == 'LIVE' %}bg-success{% elif calving.calving_outcome == 'STILLBIRTH' %}bg-danger{% else %}bg-warning{% endif %}">
+                                {{ calving.get_calving_outcome_display }}
+                            </span>
+                        </td>
+                        <td>{{ calving.number_of_calves }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No calvings recorded</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
