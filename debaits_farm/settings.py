@@ -25,8 +25,14 @@ SECRET_KEY = 'django-insecure-i1sn47d+o(4^n+zivpa1fut&u_q5%co)cbla#4l)_8adkb%+b1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
+ALLOWED_HOSTS = ['localhost', 
+                 '127.0.0.1', 
+                 'farmcattlemanagement.onrender.com', 
+                 'www.farmcattlemanagement.onrender.com',
+                 ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://farmcattlemanagement.onrender.com',
+]
 
 # Application definition
 
