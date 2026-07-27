@@ -25,6 +25,7 @@ class Cattle(models.Model):
     BREED_CHOICES=[
             ('Simmental', 'Simmental'),
             ('Brahman', 'Brahman'),
+            ('Charalois', 'Charalois'),
             ('Angus', 'Angus'),
             ('Hereford', 'Hereford'),
             ('Tswana', 'Tswana'),
@@ -41,17 +42,26 @@ class Cattle(models.Model):
     date_of_birth = models.DateField(blank=True, null=True)
 
     COLOUR_CHOICES = [
-        ('Black', 'Black'),
-        ('White', 'White'),
-        ('Brown', 'Brown'),
-        ('Red', 'Red'),
-        ('Roan', 'Roan'),
-        ('Grey', 'Grey'),
-        ('Spotted', 'Spotted'),
+        ('Tshumu', 'Tshumu'),
+        ('Tsweu', 'Tsweu'),
+        ('Naana', 'Naana'),
+        ('Nala', 'Nala'),
+        ('Tshumo e Bothiba', 'Tshumo e bothiba'),
+        ('Tshumo e Bosetha', 'Tshumo e bosetha'),
+        ('Khonou', 'Khonou'),
+        ('Khunwana', 'Khunwana'),
         ('Tshwaana','Tshwaana'),
+        ('Tubanaa', 'Tubana'),
+        ('Tshunyana', 'Tshunyana'),
+        ('Tshunyana e botihabana', 'Tshunyana e botihabana'),
+        ('Tshetiha', 'Tshetiha'),
+        ('Kgweba', 'Kgweba'),
+        ('Tubana', 'Tubana'),
+        ('Champana', 'Champana'),
+        ('Tihaba', 'Tihaba'),
         ('Other', 'Other'),
     ]
-    colour = models.CharField(max_length=20, choices=COLOUR_CHOICES, blank=True, null=True)
+    colour = models.CharField(max_length=50, choices=COLOUR_CHOICES, blank=True, null=True)
 
     STATUS_CHOICES = [
         ('Active', 'Active'),
